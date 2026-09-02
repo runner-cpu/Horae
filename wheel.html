@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Horae · Solar Wheel</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+</head>
+<body>
+<canvas id="particleCanvas"></canvas>
+
+<nav class="navbar">
+  <a href="index.html" class="logo">Horae</a>
+  <div class="links">
+    <a href="index.html" data-page="home">首页</a>
+    <a href="wheel.html" data-page="wheel">节气轮盘</a>
+    <a href="terms.html" data-page="terms">二十四节气</a>
+    <a href="data.html" data-page="data">数据总览</a>
+    <a href="chat.html" data-page="chat">AI问答</a>
+  </div>
+</nav>
+
+<div class="page-content">
+  <div class="page-header">
+    <h1>节气轮盘</h1>
+    <p class="sub">拖动旋转 · 点击节气 · 四时流转</p>
+  </div>
+
+  <div class="wheel-page">
+    <div class="wheel-left">
+      <div class="wheel-container-lg" id="wheelContainer">
+        <svg class="wheel-svg-lg" id="wheelSvg" viewBox="0 0 560 560"></svg>
+        <div class="wheel-center-lg">
+          <div class="term-name" id="wheelTermName">立春</div>
+          <div class="term-date" id="wheelTermDate">2月3-5日</div>
+          <div class="term-temp" id="wheelTermTemp">3.2°C</div>
+        </div>
+      </div>
+      <p class="wheel-hint">← 拖动轮盘旋转 · 点击扇区查看节气 →</p>
+    </div>
+    <div class="wheel-right" id="wheelRight">
+      <!-- 动态渲染 -->
+    </div>
+  </div>
+</div>
+
+<button class="back-top" id="backTop">↑</button>
+
+<footer>
+  <div class="footer-gold">Horae</div>
+  <p>数据可视化竞赛作品 · 物候数据基于《月令七十二候集解》</p>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/common.js"></script>
+<script>
+let currentWheelIndex = 0;
+let wheelRotation = 0;
+let isDragging = false;
+let dragStartX = 0;
+let dragStartRotation = 0;
+let currentChart = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  initCommon('wheel');
+  initWheel();
+  showTerm(0);
+});
+
+function initWheel() {
+  const svg = document.getElementById('wheelSvg');
+  svg.innerHTML = generateWheelSVG(560, true);
+  
+  svg.querySelectorAll('.wheel-sector').forEach(sector => {
+    sector.addEventListener('click', () => {
+      const idx = parseInt(sector.dataset.index);
+      rotateWheelTo(idx);
+      showTerm(idx);
+    });
+    sector.addEventListener('mouseenter', () => {
+      const idx = parseInt(sector.dataset.index);
+      sector.style.fill = seasonColors[solarTerms[idx].season].primary + '50';
+      sector.style.strokeWidth = '2';
+    });
+    sector.addEventListener('mouseleave', () => {
+      sector.style.fill = seasonColors[solarTerms[sector.dataset.index].season].light;
+      sector.style.strokeWidth = '1';
+    });
+  });
+  
+  const container = document.getElementById('wheelContainer');
+  const startDrag = (clientX) => { isDragging = true; dragStartX = clientX; dragStartRotation = wheelRotation; };
+  const moveDrag = (clientX) => {
+    if (!isDragging) return;
+    wheelRotation = dragStartRotation + (clientX - dragStartX) * 0.5;
+    svg.style.transform = `rotate(${wheelRotation}deg)`;
+    updateWheelCenter();
+  };
+  const endDrag = () => {
+    if (isDragging) {
+      isDragging = false;
+      const normalized = ((wheelRotation % 360) + 360) % 360;
+      const idx = Math.round(normalized / 15) % 24;
+      rotateWheelTo(idx);
+      showTerm(idx);
+    }
+  };
+  
+  container.addEventListener('mousedown', e => startDrag(e.clientX));
+  document.addEventListener('mousemove', e => moveDrag(e.clientX));
+  document.addEventListener('mouseup', endDrag);
+  container.addEventListener('touchstart', e => startDrag(e.touches[0].clientX), {passive: true});
+  document.addEventListener('touchmove', e => moveDrag(e.touches[0].clientX), {passive: true});
+  document.addEventListener('touchend', endDrag);
+}
+
+function rotateWheelTo(index) {
+  currentWheelIndex = index;
+  const target = index * 15;
+  const cur = ((wheelRotation % 360) + 360) % 360;
+  let delta = target - cur;
+  if (delta > 180) delta -= 360;
+  if (delta < -180) delta += 360;
+  wheelRotation += delta;
+  document.getElementById('wheelSvg').style.transform = `rotate(${wheelRotation}deg)`;
+  updateWheelCenter();
+}
+
+function updateWheelCenter() {
+  const normalized = ((wheelRotation % 360) + 360) % 360;
+  const idx = Math.round(normalized / 15) % 24;
+  const term = solarTerms[idx];
+  document.getElementById('wheelTermName').textContent = term.name;
+  document.getElementById('wheelTermDate').textContent = term.date;
+  document.getElementById('wheelTermTemp').textContent = `${term.modernTemp}°C`;
+}
+
+function showTerm(index) {
+  const term = solarTerms[index];
+  setThemeColor(term.season);
+  const right = document.getElementById('wheelRight');
+  right.innerHTML = `<div class="term-detail">${renderTermDetailHTML(term)}</div>`;
+  if (currentChart) { currentChart.dispose(); currentChart = null; }
+  currentChart = initTrendChart(`detail-trend-${term.id}`, term);
+}
+</script>
+</body>
+</html>

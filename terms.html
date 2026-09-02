@@ -1,0 +1,169 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Horae · 24 Solar Terms</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+</head>
+<body>
+<canvas id="particleCanvas"></canvas>
+
+<nav class="navbar">
+  <a href="index.html" class="logo">Horae</a>
+  <div class="links">
+    <a href="index.html" data-page="home">首页</a>
+    <a href="wheel.html" data-page="wheel">节气轮盘</a>
+    <a href="terms.html" data-page="terms">二十四节气</a>
+    <a href="data.html" data-page="data">数据总览</a>
+    <a href="chat.html" data-page="chat">AI问答</a>
+  </div>
+</nav>
+
+<div class="page-content">
+  <div class="page-header">
+    <h1>二十四节气</h1>
+    <p class="sub">选择季节 · 点击节气 · 查看详情</p>
+  </div>
+
+  <div class="terms-page">
+    <!-- 季节Tab -->
+    <div class="season-tabs" id="seasonTabs">
+      <button class="season-tab active spring" data-season="all">全部</button>
+      <button class="season-tab" data-season="spring">春季</button>
+      <button class="season-tab" data-season="summer">夏季</button>
+      <button class="season-tab" data-season="autumn">秋季</button>
+      <button class="season-tab" data-season="winter">冬季</button>
+    </div>
+
+    <!-- 节气卡片网格 -->
+    <div class="terms-grid" id="termsGrid"></div>
+
+    <!-- 节气详情面板 -->
+    <div class="term-detail-panel" id="termDetail">
+      <div style="text-align:center;padding:80px 20px;color:var(--dim);">
+        <div style="font-size:48px;margin-bottom:16px;">👆</div>
+        <p style="font-size:16px;letter-spacing:2px;">点击上方节气卡片，查看详细信息</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="back-top" id="backTop">↑</button>
+
+<footer>
+  <div class="footer-gold">Horae</div>
+  <p>数据可视化竞赛作品 · 物候数据基于《月令七十二候集解》</p>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/common.js"></script>
+<script>
+let currentSeason = 'all';
+let currentTermIndex = -1;
+let currentChart = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  initCommon('terms');
+  renderTermsGrid();
+  initSeasonTabs();
+});
+
+function initSeasonTabs() {
+  document.querySelectorAll('.season-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.season-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentSeason = tab.dataset.season;
+      renderTermsGrid();
+    });
+  });
+}
+
+function renderTermsGrid() {
+  const grid = document.getElementById('termsGrid');
+  const terms = currentSeason === 'all' ? solarTerms : solarTerms.filter(t => t.season === currentSeason);
+  grid.innerHTML = terms.map((term, i) => {
+    const realIndex = solarTerms.indexOf(term);
+    return `
+      <div class="term-card ${term.season}" data-index="${realIndex}">
+        <div class="name">${term.name}</div>
+        <div class="date">${term.date}</div>
+        <div class="temp">${term.modernTemp}°C</div>
+      </div>
+    `;
+  }).join('');
+  
+  grid.querySelectorAll('.term-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const idx = parseInt(card.dataset.index);
+      showTermDetail(idx);
+      grid.querySelectorAll('.term-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+    });
+  });
+}
+
+function showTermDetail(index) {
+  currentTermIndex = index;
+  const term = solarTerms[index];
+  setThemeColor(term.season);
+  const panel = document.getElementById('termDetail');
+  panel.innerHTML = `<div class="detail-grid">
+    <div class="detail-left">${renderTermDetailHTML(term)}</div>
+    <div class="detail-right" style="display:flex;flex-direction:column;gap:16px;">
+      <div class="data-card" style="margin-bottom:0;">
+        <h4>📈 50年温度趋势</h4>
+        <div class="trend-chart" id="panel-trend" style="height:280px;"></div>
+      </div>
+      <div class="data-card" style="margin-bottom:0;">
+        <h4>🌡️ 节气气候雷达</h4>
+        <div id="panel-radar" style="width:100%;height:280px;"></div>
+      </div>
+    </div>
+  </div>`;
+  
+  if (currentChart) { currentChart.dispose(); currentChart = null; }
+  currentChart = initTrendChart('panel-trend', term);
+  initRadarChart(term);
+}
+
+function initRadarChart(term) {
+  const el = document.getElementById('panel-radar');
+  if (!el) return;
+  const chart = echarts.init(el);
+  const colors = seasonColors[term.season];
+  chart.setOption({
+    backgroundColor: 'transparent',
+    tooltip: {},
+    radar: {
+      indicator: [
+        { name: '温度', max: 35 },
+        { name: '湿度', max: 100 },
+        { name: '降水', max: 100 },
+        { name: '升温幅度', max: 3 },
+        { name: '白昼时长', max: 15 },
+        { name: '物候提前', max: 15 }
+      ],
+      axisName: { color: '#a09888', fontSize: 12 },
+      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+      splitArea: { areaStyle: { color: ['rgba(255,255,255,0.02)', 'rgba(255,255,255,0.04)'] } },
+      axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } }
+    },
+    series: [{
+      type: 'radar',
+      data: [{
+        value: [term.modernTemp, term.humidity, term.precipitation, term.tempChange, (termExtras[term.id]?.dayHours || 12), 8],
+        name: term.name,
+        areaStyle: { color: colors.primary + '40' },
+        lineStyle: { color: colors.primary, width: 2 },
+        itemStyle: { color: colors.primary }
+      }]
+    }]
+  });
+}
+</script>
+</body>
+</html>
