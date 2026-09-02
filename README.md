@@ -2,11 +2,18 @@
 
 > 二十四节气与现代气候的对话 — A Data Visualization Journey Through China's 24 Solar Terms and Climate Change
 
+[![Deploy to GitHub Pages](https://github.com/runner-cpu/Horae/actions/workflows/deploy.yml/badge.svg)](https://github.com/runner-cpu/Horae/actions/workflows/deploy.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![HTML](https://img.shields.io/badge/HTML-5-E34F26)](https://developer.mozilla.org/en-US/docs/Web/HTML)
 [![CSS](https://img.shields.io/badge/CSS-3-1572B6)](https://developer.mozilla.org/en-US/docs/Web/CSS)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![ECharts](https://img.shields.io/badge/ECharts-5.5-AA3444)](https://echarts.apache.org/)
+
+## 🌐 在线访问
+
+**🔗 https://runner-cpu.github.io/Horae/**
+
+> 项目已通过 GitHub Actions 自动部署到 GitHub Pages，任何人点击链接即可直接访问网页，无需克隆或本地运行。
 
 ---
 
@@ -105,6 +112,10 @@ Horae/
 ├── README.md               # 项目说明文档
 ├── LICENSE                 # 开源协议
 ├── .gitignore              # Git忽略配置
+├── .nojekyll               # 禁用Jekyll，直接托管静态文件
+├── .github/
+│   └── workflows/
+│       └── deploy.yml      # GitHub Actions自动部署工作流
 ├── css/
 │   └── style.css           # 共享样式（21KB+）
 └── js/
