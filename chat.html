@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -24,13 +24,13 @@
 
 <div class="page-content">
   <div class="page-header">
-    <h1>AI 节气问答</h1>
-    <p class="sub">与AI对话节气、物候与气候变化</p>
+    <h1 class="gradient-text reveal">AI 节气问答</h1>
+    <p class="sub reveal">与AI对话节气、物候与气候变化</p>
   </div>
 
   <div class="chat-page">
     <div class="chat-box">
-      <div class="chat-header">💬 AI节气顾问</div>
+      <div class="chat-header">💬 AI节气顾问 <span style="margin-left:auto;font-size:11px;color:var(--dim);font-weight:normal;">在线</span></div>
       <div class="quick-qs">
         <button data-q="哪个节气升温最快？">哪个节气升温最快？</button>
         <button data-q="冬天为什么越来越暖？">冬天为什么越来越暖？</button>
@@ -38,23 +38,36 @@
         <button data-q="节气现在还准确吗？">节气现在还准确吗？</button>
         <button data-q="昼夜长短怎么变化？">昼夜长短怎么变化？</button>
         <button data-q="立春有什么习俗？">立春有什么习俗？</button>
+        <button data-q="二十四节气有哪些？">二十四节气有哪些？</button>
+        <button data-q="夏至为什么白昼最长？">夏至为什么白昼最长？</button>
       </div>
       <div class="chat-msgs" id="chatMsgs">
-        <div class="chat-msg ai"><div class="bubble">你好！我是AI节气顾问。二十四节气是古人智慧的结晶，被列入联合国教科文组织人类非物质文化遗产代表作名录。在气候变化的今天，很多节气的物候已经发生了变化。你可以问我任何关于节气、物候、气候的问题，也可以点击上方快捷问题快速开始。</div></div>
+        <div class="chat-msg ai"><div class="bubble" id="welcomeMsg"></div></div>
       </div>
       <div class="chat-input-row">
         <input type="text" id="chatInput" placeholder="输入你的问题，如：冬至为什么要吃饺子？">
-        <button id="chatSend">发送</button>
+        <button id="chatSend" class="ripple-btn">发送</button>
       </div>
+    </div>
+    <div style="text-align:center;margin-top:16px;">
+      <button class="share-btn" data-share>🔗 分享</button>
     </div>
   </div>
 </div>
 
+<nav class="mobile-nav">
+  <a href="index.html"><span class="icon">🏠</span>首页</a>
+  <a href="wheel.html"><span class="icon">🎡</span>轮盘</a>
+  <a href="terms.html"><span class="icon">📖</span>节气</a>
+  <a href="data.html"><span class="icon">📊</span>数据</a>
+  <a href="chat.html" class="active"><span class="icon">💬</span>问答</a>
+</nav>
+
 <button class="back-top" id="backTop">↑</button>
 
 <footer>
-  <div class="footer-gold">Horae</div>
-  <p><a href="https://github.com/runner-cpu/Horae" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;">🔗 GitHub 仓库</a> · 数据可视化竞赛作品 · AI回答基于节气数据与气候知识</p>
+  <div class="footer-gold">Horae · 节气志</div>
+  <p><a href="https://github.com/runner-cpu/Horae" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;">🔗 GitHub 仓库</a> · AI回答基于节气数据与气候知识</p>
 </footer>
 
 <script src="js/data.js"></script>
@@ -66,11 +79,18 @@ const responses = {
   '清明': '"清明时节雨纷纷"是杜牧的千古名句，但在气候变化的今天，这句诗的准确性正在发生变化。\n\n<strong>南方地区：</strong>清明降水依然充沛，"雨纷纷"的景象仍然典型。\n\n<strong>北方地区：</strong>清明降水日数有所减少，春季干旱频率增加，"雨纷纷"已不如从前准确。\n\n当代清明平均气温14.5°C，较过去升高1.5°C。温暖干燥的清明在北方越来越常见。',
   '准确': '二十四节气是古人基于黄河流域的物候和气候总结的时间智慧，在当代仍然具有重要的参考价值，但需要注意以下变化：\n\n<strong>仍然准确的方面：</strong>\n- 太阳黄经的天文划分完全准确\n- 季节转换的大致时间框架仍然适用\n- 农业生产的宏观节奏仍有参考价值\n\n<strong>发生变化的方面：</strong>\n- 具体物候时间普遍提前（春季物候提前约7天）\n- 入冬、入夏等季节开始时间推迟或提前\n- 初霜、初雪等气候事件日期显著推迟\n- 极端天气事件频率增加\n\n节气作为文化符号和时间框架依然珍贵，但具体物候描述需要结合当代气候进行调整。',
   '昼夜': '二十四节气与昼夜长短密切相关：\n\n<strong>春分、秋分：</strong>昼夜均分，各12小时\n<strong>夏至：</strong>白昼最长，约14.6小时（北方更长）\n<strong>冬至：</strong>白昼最短，约9.6小时（北方更短）\n\n从立春到夏至，白昼逐渐变长；从夏至到冬至，白昼逐渐变短。\n\n气候变化对昼夜长短的天文规律没有影响，但会影响昼夜温差——气候变暖导致夜间升温幅度往往大于白天，昼夜温差在缩小。',
-  '立春': '立春是二十四节气之首，标志着春季的开始。\n\n<strong>传统习俗：</strong>\n- 咬春：吃春饼、春卷、萝卜，寓意迎接春天\n- 打春牛：用泥塑春牛，鞭打以祈丰收\n- 贴宜春：在门上贴"宜春"二字\n- 迎春：官府举行迎春仪式\n\n<strong>当代气候：</strong>\n- 当代立春平均气温3.2°C，较50年前升高1.4°C\n- 河流解冻期平均提前约8天\n- 虽然"立春"，但全国大部分地区仍处于冬季\n\n立春更多是一个天文和文化上的春天起点，气象学上的春天要等到气温稳定回升。'
+  '立春': '立春是二十四节气之首，标志着春季的开始。\n\n<strong>传统习俗：</strong>\n- 咬春：吃春饼、春卷、萝卜，寓意迎接春天\n- 打春牛：用泥塑春牛，鞭打以祈丰收\n- 贴宜春：在门上贴"宜春"二字\n- 迎春：官府举行迎春仪式\n\n<strong>当代气候：</strong>\n- 当代立春平均气温3.2°C，较50年前升高1.4°C\n- 河流解冻期平均提前约8天\n- 虽然"立春"，但全国大部分地区仍处于冬季\n\n立春更多是一个天文和文化上的春天起点，气象学上的春天要等到气温稳定回升。',
+  '二十四节气': '二十四节气依次为：\n\n<strong>春季：</strong>立春、雨水、惊蛰、春分、清明、谷雨\n<strong>夏季：</strong>立夏、小满、芒种、夏至、小暑、大暑\n<strong>秋季：</strong>立秋、处暑、白露、秋分、寒露、霜降\n<strong>冬季：</strong>立冬、小雪、大雪、冬至、小寒、大寒\n\n记忆口诀："春雨惊春清谷天，夏满芒夏暑相连。秋处露秋寒霜降，冬雪雪冬小大寒。"\n\n每个节气约15天，反映了太阳在黄道上的位置变化，是古人通过观察太阳周年运动形成的时间知识体系。',
+  '夏至': '夏至是二十四节气中最早被确定的节气之一，通常在每年6月21日或22日。\n\n<strong>为什么白昼最长？</strong>\n夏至这天，太阳直射北回归线（北纬23°26′），是太阳直射点到达的最北位置。此时北半球各地的白昼时间达到全年最长，且纬度越高白昼越长。\n\n<strong>数据：</strong>\n- 北京夏至白昼约15小时\n- 哈尔滨夏至白昼约16小时\n- 漠河夏至白昼可达17小时以上\n- 北极圈内出现极昼现象\n\n夏至虽然白昼最长，但并不是一年中最热的时候。最热的时段通常在大暑前后，因为地面热量的积累需要时间。'
 };
 
 document.addEventListener('DOMContentLoaded', () => {
   initCommon('chat');
+  initEnhanced('chat');
+  // 欢迎消息打字机效果
+  setTimeout(() => {
+    typeWriter(document.getElementById('welcomeMsg'), '你好！我是AI节气顾问。二十四节气是古人智慧的结晶，被列入联合国教科文组织人类非物质文化遗产代表作名录。在气候变化的今天，很多节气的物候已经发生了变化。你可以问我任何关于节气、物候、气候的问题，也可以点击上方快捷问题快速开始。', 20);
+  }, 500);
   initChat();
 });
 
@@ -79,12 +99,20 @@ function initChat() {
   const send = document.getElementById('chatSend');
   const msgs = document.getElementById('chatMsgs');
   
-  function addMsg(text, isUser) {
+  function addMsg(text, isUser, useTypewriter = false) {
     const div = document.createElement('div');
     div.className = `chat-msg ${isUser ? 'user' : 'ai'}`;
-    div.innerHTML = `<div class="bubble">${text.replace(/\n/g,'<br>')}</div>`;
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    div.appendChild(bubble);
     msgs.appendChild(div);
     msgs.scrollTop = msgs.scrollHeight;
+    
+    if (useTypewriter && !isUser) {
+      typeWriter(bubble, text.replace(/\n/g, '\n'), 15);
+    } else {
+      bubble.innerHTML = text.replace(/\n/g, '<br>');
+    }
   }
   
   function sendMsg() {
@@ -100,8 +128,8 @@ function initChat() {
           break;
         }
       }
-      addMsg(resp, false);
-    }, 700);
+      addMsg(resp, false, true);
+    }, 500);
   }
   
   send.addEventListener('click', sendMsg);

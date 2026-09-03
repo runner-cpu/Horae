@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -25,59 +25,82 @@
 
 <div class="page-content">
   <div class="page-header">
-    <h1>数据总览</h1>
-    <p class="sub">从数据中看二十四节气的气候变化 · 1976 → 2025</p>
+    <h1 class="gradient-text reveal">数据总览</h1>
+    <p class="sub reveal">从数据中看二十四节气的气候变化 · 1976 → 2025</p>
+    <div style="margin-top:16px;">
+      <button class="share-btn" data-share>🔗 分享</button>
+    </div>
   </div>
 
   <div class="data-page">
     <div class="data-grid">
       <!-- 温升排行 -->
-      <div class="data-card data-card-full">
+      <div class="data-card data-card-full reveal">
         <h4>📈 二十四节气温升幅度排行</h4>
         <div id="overviewChart" style="width:100%;height:400px;"></div>
       </div>
 
       <!-- 热力图 -->
-      <div class="data-card data-card-full">
+      <div class="data-card data-card-full reveal">
         <h4>🌡️ 节气-月份温度热力图</h4>
         <div id="heatmapChart" style="width:100%;height:360px;"></div>
       </div>
 
       <!-- 四季对比 -->
-      <div class="data-card">
+      <div class="data-card reveal-left">
         <h4>🍂 四季温升对比</h4>
         <div id="seasonChart" style="width:100%;height:320px;"></div>
       </div>
 
       <!-- 古今温度对比 -->
-      <div class="data-card">
+      <div class="data-card reveal-right">
         <h4>⚖️ 古今温度对比（全年）</h4>
         <div id="compareChart" style="width:100%;height:320px;"></div>
       </div>
 
+      <!-- 昼夜时长 -->
+      <div class="data-card data-card-full reveal">
+        <h4>🌗 二十四节气昼夜时长分布</h4>
+        <div id="daynightChart" style="width:100%;height:320px;"></div>
+      </div>
+
+      <!-- 湿度降水散点 -->
+      <div class="data-card reveal-left">
+        <h4>💧 湿度-降水量关系</h4>
+        <div id="scatterChart" style="width:100%;height:300px;"></div>
+      </div>
+
+      <!-- 升温雷达对比 -->
+      <div class="data-card reveal-right">
+        <h4>🎯 四季气候雷达对比</h4>
+        <div id="seasonRadarChart" style="width:100%;height:300px;"></div>
+      </div>
+
       <!-- 物候变化 -->
-      <div class="data-card data-card-full">
+      <div class="data-card data-card-full reveal">
         <h4>🌸 物候变化汇总</h4>
         <table class="phenology-table">
           <thead><tr><th>物候事件</th><th>50年前</th><th>当代</th><th>变化</th></tr></thead>
           <tbody id="phenologyBody"></tbody>
         </table>
       </div>
-
-      <!-- 昼夜时长变化 -->
-      <div class="data-card data-card-full">
-        <h4>🌗 二十四节气昼夜时长分布</h4>
-        <div id="daynightChart" style="width:100%;height:320px;"></div>
-      </div>
     </div>
   </div>
 </div>
 
+<nav class="mobile-nav">
+  <a href="index.html"><span class="icon">🏠</span>首页</a>
+  <a href="wheel.html"><span class="icon">🎡</span>轮盘</a>
+  <a href="terms.html"><span class="icon">📖</span>节气</a>
+  <a href="data.html" class="active"><span class="icon">📊</span>数据</a>
+  <a href="chat.html"><span class="icon">💬</span>问答</a>
+</nav>
+
 <button class="back-top" id="backTop">↑</button>
 
 <footer>
-  <div class="footer-gold">Horae</div>
-  <p><a href="https://github.com/runner-cpu/Horae" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;">🔗 GitHub 仓库</a> · 数据可视化竞赛作品 · 气候数据基于公开气象资料趋势模拟</p>
+  <div class="footer-gold">Horae · 节气志</div>
+  <p><a href="https://github.com/runner-cpu/Horae" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;">🔗 GitHub 仓库</a> · 气候数据基于公开气象资料趋势模拟</p>
 </footer>
 
 <script src="js/data.js"></script>
@@ -85,12 +108,17 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   initCommon('data');
-  initOverviewChart();
-  initHeatmap();
-  initSeasonChart();
-  initCompareChart();
-  initPhenologyTable();
-  initDaynightChart();
+  initEnhanced('data');
+  setTimeout(() => {
+    initOverviewChart();
+    initHeatmap();
+    initSeasonChart();
+    initCompareChart();
+    initDaynightChart();
+    initScatterChart();
+    initSeasonRadarChart();
+    initPhenologyTable();
+  }, 200);
 });
 
 function initOverviewChart() {
@@ -179,18 +207,6 @@ function initCompareChart() {
   window.addEventListener('resize', () => chart.resize());
 }
 
-function initPhenologyTable() {
-  const tbody = document.getElementById('phenologyBody');
-  tbody.innerHTML = phenologySummary.map(p => `
-    <tr>
-      <td>${p.event}</td>
-      <td>${p.oldDate}</td>
-      <td>${p.newDate}</td>
-      <td class="${p.change < 0 ? 'earlier' : 'later'}">${p.change < 0 ? '提前' : '推迟'} ${Math.abs(p.change)}天</td>
-    </tr>
-  `).join('');
-}
-
 function initDaynightChart() {
   const chart = echarts.init(document.getElementById('daynightChart'));
   chart.setOption({
@@ -205,11 +221,83 @@ function initDaynightChart() {
     xAxis: { type: 'category', data: solarTerms.map(t => t.name), axisLabel: { color: '#a09888', fontSize: 10, rotate: 45 }, axisLine: { lineStyle: { color: '#333' } } },
     yAxis: { type: 'value', name: '小时', nameTextStyle: { color: '#a09888' }, axisLabel: { color: '#a09888' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } }, max: 16 },
     series: [
-      { name: '白昼时长', type: 'bar', stack: 'total', data: solarTerms.map(t => (termExtras[t.id]?.dayHours || 12)), itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#ffc107'},{offset:1,color:'#ff9800'}]), borderRadius: [0,0,0,0] }, barWidth: 14 },
+      { name: '白昼时长', type: 'bar', stack: 'total', data: solarTerms.map(t => (termExtras[t.id]?.dayHours || 12)), itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#ffc107'},{offset:1,color:'#ff9800'}]) }, barWidth: 14 },
       { name: '黑夜时长', type: 'bar', stack: 'total', data: solarTerms.map(t => (termExtras[t.id]?.nightHours || 12)), itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#3949ab'},{offset:1,color:'#1a237e'}]) }, barWidth: 14 }
     ]
   });
   window.addEventListener('resize', () => chart.resize());
+}
+
+function initScatterChart() {
+  const chart = echarts.init(document.getElementById('scatterChart'));
+  const seasons = ['spring', 'summer', 'autumn', 'winter'];
+  const seasonNames = { spring: '春', summer: '夏', autumn: '秋', winter: '冬' };
+  const series = seasons.map(s => ({
+    name: seasonNames[s] + '季',
+    type: 'scatter',
+    data: solarTerms.filter(t => t.season === s).map(t => [t.humidity, t.precipitation, t.name]),
+    symbolSize: 14,
+    itemStyle: { color: seasonColors[s].primary, opacity: 0.8 }
+  }));
+  chart.setOption({
+    backgroundColor: 'transparent',
+    tooltip: { formatter: p => `${p.value[2]}<br/>湿度: ${p.value[0]}%<br/>降水: ${p.value[1]}mm` },
+    legend: { data: seasons.map(s => seasonNames[s] + '季'), textStyle: { color: '#a09888' }, top: 0 },
+    grid: { left: 50, right: 20, top: 40, bottom: 40 },
+    xAxis: { name: '湿度 (%)', nameTextStyle: { color: '#a09888' }, axisLabel: { color: '#a09888' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+    yAxis: { name: '降水量 (mm)', nameTextStyle: { color: '#a09888' }, axisLabel: { color: '#a09888' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+    series
+  });
+  window.addEventListener('resize', () => chart.resize());
+}
+
+function initSeasonRadarChart() {
+  const chart = echarts.init(document.getElementById('seasonRadarChart'));
+  const seasons = [
+    { name: '春季', color: '#8bc34a', terms: solarTerms.filter(t => t.season === 'spring') },
+    { name: '夏季', color: '#ef5350', terms: solarTerms.filter(t => t.season === 'summer') },
+    { name: '秋季', color: '#ffa726', terms: solarTerms.filter(t => t.season === 'autumn') },
+    { name: '冬季', color: '#42a5f5', terms: solarTerms.filter(t => t.season === 'winter') }
+  ];
+  const avg = arr => arr.reduce((a,b) => a+b, 0) / arr.length;
+  chart.setOption({
+    backgroundColor: 'transparent',
+    tooltip: {},
+    legend: { data: seasons.map(s => s.name), textStyle: { color: '#a09888' }, top: 0 },
+    radar: {
+      indicator: [
+        { name: '平均温度', max: 30 }, { name: '湿度', max: 100 },
+        { name: '降水', max: 100 }, { name: '升温幅度', max: 3 },
+        { name: '白昼时长', max: 15 }
+      ],
+      axisName: { color: '#a09888', fontSize: 11 },
+      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+      splitArea: { areaStyle: { color: ['rgba(255,255,255,0.02)', 'rgba(255,255,255,0.04)'] } }
+    },
+    series: [{
+      type: 'radar',
+      data: seasons.map(s => ({
+        name: s.name,
+        value: [avg(s.terms.map(t => t.modernTemp)), avg(s.terms.map(t => t.humidity)), avg(s.terms.map(t => t.precipitation)), avg(s.terms.map(t => t.tempChange)), avg(s.terms.map(t => termExtras[t.id]?.dayHours || 12))],
+        lineStyle: { color: s.color, width: 2 },
+        areaStyle: { color: s.color + '20' },
+        itemStyle: { color: s.color }
+      }))
+    }]
+  });
+  window.addEventListener('resize', () => chart.resize());
+}
+
+function initPhenologyTable() {
+  const tbody = document.getElementById('phenologyBody');
+  tbody.innerHTML = phenologySummary.map(p => `
+    <tr>
+      <td>${p.event}</td>
+      <td>${p.oldDate}</td>
+      <td>${p.newDate}</td>
+      <td class="${p.change < 0 ? 'earlier' : 'later'}">${p.change < 0 ? '提前' : '推迟'} ${Math.abs(p.change)}天</td>
+    </tr>
+  `).join('');
 }
 </script>
 </body>

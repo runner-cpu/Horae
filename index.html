@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -26,94 +26,146 @@
 <div class="page-content">
   <!-- Hero -->
   <section class="hero">
-    <div class="badge">数据可视化竞赛作品 · 联合国非遗</div>
-    <h1>节气志</h1>
-    <p class="subtitle">二十四节气 · 与现代气候的对话</p>
-    <div class="stats">
-      <div class="stat"><div class="num">24</div><div class="label">节气穿越千年</div></div>
-      <div class="stat"><div class="num">+1.7°C</div><div class="label">当代节气平均升温</div></div>
-      <div class="stat"><div class="num">22</div><div class="label">个节气显著升温</div></div>
+    <div class="badge reveal">数据可视化竞赛作品 · 联合国非遗</div>
+    <h1 class="gradient-text reveal" style="animation-delay:0.1s">节气志</h1>
+    <p class="sub reveal" style="animation-delay:0.2s">二十四节气 · 与现代气候的对话</p>
+    <div class="stats reveal" style="animation-delay:0.3s">
+      <div class="stat"><div class="num stat-num" data-count="24">0</div><div class="label">节气穿越千年</div></div>
+      <div class="stat"><div class="num stat-num" data-count="1.7" data-suffix="°C">0</div><div class="label">当代节气平均升温</div></div>
+      <div class="stat"><div class="num stat-num" data-count="22">0</div><div class="label">个节气显著升温</div></div>
     </div>
-    <div class="cta-group">
-      <a href="wheel.html" class="cta-btn primary">开启四时之旅 →</a>
-      <a href="data.html" class="cta-btn secondary">查看数据</a>
+    <div class="cta-group reveal" style="animation-delay:0.4s">
+      <a href="wheel.html" class="cta-btn primary ripple-btn">开启四时之旅 →</a>
+      <a href="data.html" class="cta-btn secondary ripple-btn">查看数据</a>
+      <button class="cta-btn secondary ripple-btn" data-share style="font-family:inherit;">🔗 分享</button>
+    </div>
+    <p class="scroll-hint">↓ 向下滚动，探索更多</p>
+  </section>
+
+  <!-- 当前节气 -->
+  <section class="intro-section">
+    <div class="current-term-card reveal-scale" id="currentTermCard">
+      <div class="label">📍 当前节气</div>
+      <div class="name" id="currentTermName">—</div>
+      <div class="info" id="currentTermInfo">—</div>
+      <div class="countdown" id="currentTermCountdown">—</div>
+    </div>
+
+    <h2 class="reveal">项目简介</h2>
+    <p class="intro-sub reveal">当千年节气智慧遇见当代气候变化</p>
+    <div class="intro-grid">
+      <div class="intro-card card-3d reveal-left">
+        <div class="icon">🌍</div>
+        <h3>古今对话</h3>
+        <p>以《月令七十二候集解》为文化根基，对比1976年与2025年的气候数据，展现二十四节气在全球变暖背景下的物候变迁。</p>
+      </div>
+      <div class="intro-card card-3d reveal">
+        <div class="icon">🎨</div>
+        <h3>视觉叙事</h3>
+        <p>融合中国传统色彩、节气诗词、时令花卉与饮食，通过交互式节气轮盘、动态粒子背景、四季主题色切换，打造沉浸式东方美学数据体验。</p>
+      </div>
+      <div class="intro-card card-3d reveal-right">
+        <div class="icon">🤖</div>
+        <h3>AI赋能</h3>
+        <p>内置AI节气问答系统，解答节气习俗、物候变化、气候趋势。每个节气配有AI古今对话，用数据讲述气候变化的故事。</p>
+      </div>
     </div>
   </section>
 
-  <!-- 项目介绍 -->
-  <section class="intro-section">
-    <h2>项目简介</h2>
-    <p class="intro-sub">当千年节气智慧遇见当代气候变化</p>
-    <div class="intro-grid">
-      <div class="intro-card">
-        <div class="icon">🌍</div>
-        <h3>古今对话</h3>
-        <p>以《月令七十二候集解》为文化根基，对比1976年与2025年的气候数据，展现二十四节气在全球变暖背景下的物候变迁。春天来得更早，冬天越来越暖。</p>
-      </div>
-      <div class="intro-card">
-        <div class="icon">🎨</div>
-        <h3>视觉叙事</h3>
-        <p>融合中国传统色彩、节气诗词、时令花卉与饮食，通过交互式节气轮盘、动态粒子背景、四季主题色切换，打造沉浸式的东方美学数据体验。</p>
-      </div>
-      <div class="intro-card">
-        <div class="icon">🤖</div>
-        <h3>AI赋能</h3>
-        <p>内置AI节气问答系统，解答节气习俗、物候变化、气候趋势等问题。每个节气配有AI古今对话，用数据讲述气候变化的故事。</p>
-      </div>
+  <!-- 六大特色 -->
+  <section class="intro-section" style="padding-top:20px;">
+    <h2 class="reveal">六大核心特色</h2>
+    <p class="intro-sub reveal">沉浸式数据可视化体验</p>
+    <div class="features-grid">
+      <div class="feature-card card-3d reveal"><span class="icon">🎡</span><h3>交互式轮盘</h3><p>可拖拽旋转的SVG节气轮盘，北斗七星装饰，传统色点环，点击联动详情</p></div>
+      <div class="feature-card card-3d reveal"><span class="icon">✨</span><h3>粒子背景</h3><p>70+发光粒子与连线网络，颜色随季节主题实时变化，营造星空氛围</p></div>
+      <div class="feature-card card-3d reveal"><span class="icon">📜</span><h3>诗词文化</h3><p>24首节气经典古诗词，72候物候描述，古籍原文引用，文化底蕴深厚</p></div>
+      <div class="feature-card card-3d reveal"><span class="icon">📊</span><h3>多维可视化</h3><p>8+种ECharts图表：柱状图、热力图、饼图、折线图、雷达图、堆叠图等</p></div>
+      <div class="feature-card card-3d reveal"><span class="icon">🎨</span><h3>传统色库</h3><p>24节气各对应中国传统色（天青、黛蓝、竹青、朱砂、月白…），含HEX色值</p></div>
+      <div class="feature-card card-3d reveal"><span class="icon">🌗</span><h3>昼夜时长</h3><p>每节气昼夜时长可视化，渐变进度条+日出日落时间，感受时间流转</p></div>
+    </div>
+  </section>
+
+  <!-- 数据亮点 -->
+  <section class="intro-section" style="padding-top:20px;">
+    <h2 class="reveal">数据亮点</h2>
+    <p class="intro-sub reveal">从数据中看气候变化</p>
+    <div class="highlights-grid">
+      <div class="highlight-card reveal-scale"><div class="num stat-num" data-count="24">0</div><div class="label">节气完整数据</div></div>
+      <div class="highlight-card reveal-scale"><div class="num stat-num" data-count="72">0</div><div class="label">物候描述</div></div>
+      <div class="highlight-card reveal-scale"><div class="num stat-num" data-count="50">0</div><div class="label">年气候对比</div></div>
+      <div class="highlight-card reveal-scale"><div class="num stat-num" data-count="8">0</div><div class="label">种可视化图表</div></div>
     </div>
   </section>
 
   <!-- 轮盘预览 -->
   <section class="preview-section">
-    <h2>节气轮盘</h2>
-    <p class="sub">拖动旋转 · 四时流转 · 点击探索</p>
-    <div class="preview-wheel">
+    <h2 class="reveal">节气轮盘</h2>
+    <p class="sub reveal">拖动旋转 · 四时流转 · 点击探索</p>
+    <div class="preview-wheel reveal-scale">
       <svg viewBox="0 0 520 520" width="100%" height="100%" id="previewWheel"></svg>
     </div>
-    <a href="wheel.html" class="cta-btn primary">进入轮盘交互 →</a>
+    <a href="wheel.html" class="cta-btn primary ripple-btn">进入轮盘交互 →</a>
   </section>
 
   <!-- 快速导航 -->
   <section class="intro-section">
-    <h2>探索节气</h2>
-    <p class="intro-sub">选择一个方向，深入了解二十四节气</p>
+    <h2 class="reveal">探索节气</h2>
+    <p class="intro-sub reveal">选择一个方向，深入了解二十四节气</p>
     <div class="intro-grid">
-      <a href="terms.html" class="intro-card" style="text-decoration:none;color:inherit;">
-        <div class="icon">📖</div>
-        <h3>二十四节气</h3>
-        <p>逐节气查看诗词、三候、古今温度对比、昼夜时长、时令饮食、传统色与AI对话。Tab式切换，不再长滚动。</p>
+      <a href="terms.html" class="intro-card card-3d reveal-left" style="text-decoration:none;color:inherit;">
+        <div class="icon">📖</div><h3>二十四节气</h3>
+        <p>逐节气查看诗词、三候、古今温度对比、昼夜时长、时令饮食、传统色与AI对话。支持搜索和季节筛选。</p>
       </a>
-      <a href="data.html" class="intro-card" style="text-decoration:none;color:inherit;">
-        <div class="icon">📊</div>
-        <h3>数据总览</h3>
-        <p>二十四节气温升幅度排行、节气-月份温度热力图、四季温升对比、物候变化汇总表，一图看懂气候变化。</p>
+      <a href="data.html" class="intro-card card-3d reveal" style="text-decoration:none;color:inherit;">
+        <div class="icon">📊</div><h3>数据总览</h3>
+        <p>二十四节气温升幅度排行、节气-月份温度热力图、四季温升对比、古今温度对比、昼夜时长分布、物候变化汇总表。</p>
       </a>
-      <a href="chat.html" class="intro-card" style="text-decoration:none;color:inherit;">
-        <div class="icon">💬</div>
-        <h3>AI问答</h3>
-        <p>与AI节气顾问对话，了解节气习俗、物候变化、气候趋势。支持快捷问题，也可自由提问。</p>
+      <a href="chat.html" class="intro-card card-3d reveal-right" style="text-decoration:none;color:inherit;">
+        <div class="icon">💬</div><h3>AI问答</h3>
+        <p>与AI节气顾问对话，了解节气习俗、物候变化、气候趋势。支持快捷问题，打字机效果回复，也可自由提问。</p>
       </a>
     </div>
   </section>
 </div>
 
+<!-- 移动端底部导航 -->
+<nav class="mobile-nav">
+  <a href="index.html" class="active"><span class="icon">🏠</span>首页</a>
+  <a href="wheel.html"><span class="icon">🎡</span>轮盘</a>
+  <a href="terms.html"><span class="icon">📖</span>节气</a>
+  <a href="data.html"><span class="icon">📊</span>数据</a>
+  <a href="chat.html"><span class="icon">💬</span>问答</a>
+</nav>
+
 <button class="back-top" id="backTop">↑</button>
 
 <footer>
-  <div class="footer-gold">Horae</div>
-  <p><a href="https://github.com/runner-cpu/Horae" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;">🔗 GitHub 仓库</a> · 数据可视化竞赛作品 · 物候数据基于《月令七十二候集解》 · 气候数据基于公开气象资料趋势模拟</p>
+  <div class="footer-gold">Horae · 节气志</div>
+  <p><a href="https://github.com/runner-cpu/Horae" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;">🔗 GitHub 仓库</a> · 物候数据基于《月令七十二候集解》 · 气候数据基于公开气象资料趋势模拟</p>
   <p style="margin-top:6px;">二十四节气 · 联合国教科文组织人类非物质文化遗产代表作名录</p>
 </footer>
 
 <script src="js/data.js"></script>
 <script src="js/common.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    initCommon('home');
-    // 预览轮盘
-    const svg = document.getElementById('previewWheel');
-    if (svg) svg.innerHTML = generateWheelSVG(520, true);
-  });
+document.addEventListener('DOMContentLoaded', () => {
+  initCommon('home');
+  initEnhanced('home');
+  
+  // 预览轮盘
+  const svg = document.getElementById('previewWheel');
+  if (svg) svg.innerHTML = generateWheelSVG(520, true);
+  
+  // 当前节气
+  const currentName = getCurrentTerm();
+  const term = getTermData(currentName);
+  const extra = termExtras[term.id] || {};
+  document.getElementById('currentTermName').textContent = currentName;
+  document.getElementById('currentTermInfo').textContent = `${term.date} · 当代均温 ${term.modernTemp}°C · ${extra.flower || ''}`;
+  document.getElementById('currentTermCountdown').textContent = `物候变化：${term.phenologyChange}`;
+  setThemeColor(term.season);
+});
 </script>
 </body>
 </html>

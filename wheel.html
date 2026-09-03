@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -25,12 +25,15 @@
 
 <div class="page-content">
   <div class="page-header">
-    <h1>节气轮盘</h1>
-    <p class="sub">拖动旋转 · 点击节气 · 四时流转</p>
+    <h1 class="gradient-text reveal">节气轮盘</h1>
+    <p class="sub reveal">拖动旋转 · 点击节气 · 四时流转</p>
   </div>
 
+  <!-- 节气快速切换 -->
+  <div class="term-quick-nav reveal" id="quickNav"></div>
+
   <div class="wheel-page">
-    <div class="wheel-left">
+    <div class="wheel-left reveal-left">
       <div class="wheel-container-lg" id="wheelContainer">
         <svg class="wheel-svg-lg" id="wheelSvg" viewBox="0 0 560 560"></svg>
         <div class="wheel-center-lg">
@@ -40,18 +43,37 @@
         </div>
       </div>
       <p class="wheel-hint">← 拖动轮盘旋转 · 点击扇区查看节气 →</p>
+      <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;">
+        <button class="share-btn" data-share>🔗 分享</button>
+        <button class="share-btn" id="prevTerm">← 上一个</button>
+        <button class="share-btn" id="nextTerm">下一个 →</button>
+      </div>
     </div>
-    <div class="wheel-right" id="wheelRight">
+    <div class="wheel-right reveal-right" id="wheelRight">
       <!-- 动态渲染 -->
     </div>
   </div>
 </div>
 
+<!-- 轮盘tooltip -->
+<div class="wheel-tooltip" id="wheelTooltip">
+  <div class="tt-name" id="ttName">—</div>
+  <div class="tt-info" id="ttInfo">—</div>
+</div>
+
+<nav class="mobile-nav">
+  <a href="index.html"><span class="icon">🏠</span>首页</a>
+  <a href="wheel.html" class="active"><span class="icon">🎡</span>轮盘</a>
+  <a href="terms.html"><span class="icon">📖</span>节气</a>
+  <a href="data.html"><span class="icon">📊</span>数据</a>
+  <a href="chat.html"><span class="icon">💬</span>问答</a>
+</nav>
+
 <button class="back-top" id="backTop">↑</button>
 
 <footer>
-  <div class="footer-gold">Horae</div>
-  <p><a href="https://github.com/runner-cpu/Horae" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;">🔗 GitHub 仓库</a> · 数据可视化竞赛作品 · 物候数据基于《月令七十二候集解》</p>
+  <div class="footer-gold">Horae · 节气志</div>
+  <p><a href="https://github.com/runner-cpu/Horae" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;">🔗 GitHub 仓库</a> · 物候数据基于《月令七十二候集解》</p>
 </footer>
 
 <script src="js/data.js"></script>
@@ -63,38 +85,85 @@ let isDragging = false;
 let dragStartX = 0;
 let dragStartRotation = 0;
 let currentChart = null;
+let velocity = 0;
+let lastX = 0;
+let lastTime = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
   initCommon('wheel');
+  initEnhanced('wheel');
   initWheel();
+  initQuickNav();
   showTerm(0);
+  
+  document.getElementById('prevTerm').addEventListener('click', () => {
+    const idx = (currentWheelIndex - 1 + 24) % 24;
+    rotateWheelTo(idx); showTerm(idx);
+  });
+  document.getElementById('nextTerm').addEventListener('click', () => {
+    const idx = (currentWheelIndex + 1) % 24;
+    rotateWheelTo(idx); showTerm(idx);
+  });
 });
+
+function initQuickNav() {
+  const nav = document.getElementById('quickNav');
+  nav.innerHTML = solarTerms.map((t, i) => 
+    `<button class="term-quick-btn ${i===0?'active':''}" data-idx="${i}">${t.name}</button>`
+  ).join('');
+  nav.querySelectorAll('.term-quick-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      rotateWheelTo(idx); showTerm(idx);
+      nav.querySelectorAll('.term-quick-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+}
 
 function initWheel() {
   const svg = document.getElementById('wheelSvg');
   svg.innerHTML = generateWheelSVG(560, true);
+  const tooltip = document.getElementById('wheelTooltip');
   
   svg.querySelectorAll('.wheel-sector').forEach(sector => {
     sector.addEventListener('click', () => {
       const idx = parseInt(sector.dataset.index);
-      rotateWheelTo(idx);
-      showTerm(idx);
+      rotateWheelTo(idx); showTerm(idx);
+      document.querySelectorAll('.term-quick-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.term-quick-btn[data-idx="${idx}"]`)?.classList.add('active');
     });
-    sector.addEventListener('mouseenter', () => {
+    sector.addEventListener('mouseenter', (e) => {
       const idx = parseInt(sector.dataset.index);
-      sector.style.fill = seasonColors[solarTerms[idx].season].primary + '50';
+      const term = solarTerms[idx];
+      document.getElementById('ttName').textContent = term.name;
+      document.getElementById('ttInfo').textContent = `${term.date} · ${term.modernTemp}°C`;
+      tooltip.classList.add('show');
+      sector.style.fill = seasonColors[term.season].primary + '50';
       sector.style.strokeWidth = '2';
     });
+    sector.addEventListener('mousemove', (e) => {
+      tooltip.style.left = (e.clientX + 15) + 'px';
+      tooltip.style.top = (e.clientY + 15) + 'px';
+    });
     sector.addEventListener('mouseleave', () => {
+      tooltip.classList.remove('show');
       sector.style.fill = seasonColors[solarTerms[sector.dataset.index].season].light;
       sector.style.strokeWidth = '1';
     });
   });
   
   const container = document.getElementById('wheelContainer');
-  const startDrag = (clientX) => { isDragging = true; dragStartX = clientX; dragStartRotation = wheelRotation; };
+  const startDrag = (clientX) => {
+    isDragging = true; dragStartX = clientX; dragStartRotation = wheelRotation;
+    velocity = 0; lastX = clientX; lastTime = Date.now();
+  };
   const moveDrag = (clientX) => {
     if (!isDragging) return;
+    const now = Date.now();
+    const dt = now - lastTime;
+    if (dt > 0) velocity = (clientX - lastX) / dt * 16;
+    lastX = clientX; lastTime = now;
     wheelRotation = dragStartRotation + (clientX - dragStartX) * 0.5;
     svg.style.transform = `rotate(${wheelRotation}deg)`;
     updateWheelCenter();
@@ -102,10 +171,19 @@ function initWheel() {
   const endDrag = () => {
     if (isDragging) {
       isDragging = false;
+      // 惯性
+      if (Math.abs(velocity) > 2) {
+        const inertia = velocity * 10;
+        wheelRotation += inertia;
+        svg.style.transition = 'transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94)';
+        svg.style.transform = `rotate(${wheelRotation}deg)`;
+        setTimeout(() => { svg.style.transition = ''; }, 800);
+      }
       const normalized = ((wheelRotation % 360) + 360) % 360;
       const idx = Math.round(normalized / 15) % 24;
-      rotateWheelTo(idx);
-      showTerm(idx);
+      rotateWheelTo(idx); showTerm(idx);
+      document.querySelectorAll('.term-quick-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.term-quick-btn[data-idx="${idx}"]`)?.classList.add('active');
     }
   };
   

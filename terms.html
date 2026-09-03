@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -25,13 +25,20 @@
 
 <div class="page-content">
   <div class="page-header">
-    <h1>二十四节气</h1>
-    <p class="sub">选择季节 · 点击节气 · 查看详情</p>
+    <h1 class="gradient-text reveal">二十四节气</h1>
+    <p class="sub reveal">搜索 · 筛选 · 点击节气查看详情</p>
   </div>
 
   <div class="terms-page">
+    <!-- 搜索框 -->
+    <div class="search-box reveal">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="搜索节气名称、物候、诗词...">
+      <button class="search-clear" id="searchClear">×</button>
+    </div>
+
     <!-- 季节Tab -->
-    <div class="season-tabs" id="seasonTabs">
+    <div class="season-tabs reveal" id="seasonTabs">
       <button class="season-tab active spring" data-season="all">全部</button>
       <button class="season-tab" data-season="spring">春季</button>
       <button class="season-tab" data-season="summer">夏季</button>
@@ -39,24 +46,41 @@
       <button class="season-tab" data-season="winter">冬季</button>
     </div>
 
+    <!-- 时间轴导航 -->
+    <div class="timeline-nav reveal" id="timelineNav"></div>
+
     <!-- 节气卡片网格 -->
     <div class="terms-grid" id="termsGrid"></div>
 
+    <!-- 无搜索结果 -->
+    <div class="search-no-result" id="noResult" style="display:none;">
+      <div style="font-size:48px;margin-bottom:16px;">🔍</div>
+      <p>未找到匹配的节气，试试其他关键词</p>
+    </div>
+
     <!-- 节气详情面板 -->
     <div class="term-detail-panel" id="termDetail">
-      <div style="text-align:center;padding:80px 20px;color:var(--dim);">
-        <div style="font-size:48px;margin-bottom:16px;">👆</div>
-        <p style="font-size:16px;letter-spacing:2px;">点击上方节气卡片，查看详细信息</p>
+      <div class="empty-state">
+        <div class="icon">👆</div>
+        <p>点击上方节气卡片，查看详细信息</p>
       </div>
     </div>
   </div>
 </div>
 
+<nav class="mobile-nav">
+  <a href="index.html"><span class="icon">🏠</span>首页</a>
+  <a href="wheel.html"><span class="icon">🎡</span>轮盘</a>
+  <a href="terms.html" class="active"><span class="icon">📖</span>节气</a>
+  <a href="data.html"><span class="icon">📊</span>数据</a>
+  <a href="chat.html"><span class="icon">💬</span>问答</a>
+</nav>
+
 <button class="back-top" id="backTop">↑</button>
 
 <footer>
-  <div class="footer-gold">Horae</div>
-  <p><a href="https://github.com/runner-cpu/Horae" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;">🔗 GitHub 仓库</a> · 数据可视化竞赛作品 · 物候数据基于《月令七十二候集解》</p>
+  <div class="footer-gold">Horae · 节气志</div>
+  <p><a href="https://github.com/runner-cpu/Horae" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;">🔗 GitHub 仓库</a> · 物候数据基于《月令七十二候集解》</p>
 </footer>
 
 <script src="js/data.js"></script>
@@ -65,12 +89,52 @@
 let currentSeason = 'all';
 let currentTermIndex = -1;
 let currentChart = null;
+let currentRadar = null;
+let searchKeyword = '';
 
 document.addEventListener('DOMContentLoaded', () => {
   initCommon('terms');
+  initEnhanced('terms');
+  renderTimeline();
   renderTermsGrid();
   initSeasonTabs();
+  initSearch();
 });
+
+function initSearch() {
+  const input = document.getElementById('searchInput');
+  const clear = document.getElementById('searchClear');
+  input.addEventListener('input', (e) => {
+    searchKeyword = e.target.value.trim().toLowerCase();
+    clear.classList.toggle('show', searchKeyword.length > 0);
+    renderTermsGrid();
+  });
+  clear.addEventListener('click', () => {
+    input.value = '';
+    searchKeyword = '';
+    clear.classList.remove('show');
+    renderTermsGrid();
+  });
+}
+
+function renderTimeline() {
+  const nav = document.getElementById('timelineNav');
+  nav.innerHTML = solarTerms.map((t, i) => 
+    `<div class="timeline-item" data-idx="${i}">
+      <div class="t-name">${t.name}</div>
+      <div class="t-date">${t.date}</div>
+    </div>`
+  ).join('');
+  nav.querySelectorAll('.timeline-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const idx = parseInt(item.dataset.idx);
+      showTermDetail(idx);
+      document.querySelectorAll('.timeline-item').forEach(t => t.classList.remove('active'));
+      item.classList.add('active');
+      document.getElementById('termDetail').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+}
 
 function initSeasonTabs() {
   document.querySelectorAll('.season-tab').forEach(tab => {
@@ -85,11 +149,29 @@ function initSeasonTabs() {
 
 function renderTermsGrid() {
   const grid = document.getElementById('termsGrid');
-  const terms = currentSeason === 'all' ? solarTerms : solarTerms.filter(t => t.season === currentSeason);
-  grid.innerHTML = terms.map((term, i) => {
+  const noResult = document.getElementById('noResult');
+  let terms = currentSeason === 'all' ? solarTerms : solarTerms.filter(t => t.season === currentSeason);
+  
+  if (searchKeyword) {
+    terms = terms.filter(t => {
+      const extra = termExtras[t.id] || {};
+      const searchText = [
+        t.name, t.pinyin, t.phenology.first, t.phenology.second, t.phenology.third,
+        t.ancient, extra.poem?.title, extra.poem?.author, extra.poem?.content,
+        extra.food, extra.flower, extra.color?.name
+      ].join(' ').toLowerCase();
+      return searchText.includes(searchKeyword);
+    });
+  }
+  
+  noResult.style.display = terms.length === 0 ? 'block' : 'none';
+  grid.style.display = terms.length === 0 ? 'none' : 'grid';
+  
+  grid.innerHTML = terms.map((term) => {
     const realIndex = solarTerms.indexOf(term);
+    const isActive = realIndex === currentTermIndex;
     return `
-      <div class="term-card ${term.season}" data-index="${realIndex}">
+      <div class="term-card ${term.season} ${isActive?'active':''}" data-index="${realIndex}">
         <div class="name">${term.name}</div>
         <div class="date">${term.date}</div>
         <div class="temp">${term.modernTemp}°C</div>
@@ -103,6 +185,8 @@ function renderTermsGrid() {
       showTermDetail(idx);
       grid.querySelectorAll('.term-card').forEach(c => c.classList.remove('active'));
       card.classList.add('active');
+      document.querySelectorAll('.timeline-item').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.timeline-item[data-idx="${idx}"]`)?.classList.add('active');
     });
   });
 }
@@ -117,18 +201,24 @@ function showTermDetail(index) {
     <div class="detail-right" style="display:flex;flex-direction:column;gap:16px;">
       <div class="data-card" style="margin-bottom:0;">
         <h4>📈 50年温度趋势</h4>
-        <div class="trend-chart" id="panel-trend" style="height:280px;"></div>
+        <div class="trend-chart" id="panel-trend" style="height:260px;"></div>
       </div>
       <div class="data-card" style="margin-bottom:0;">
-        <h4>🌡️ 节气气候雷达</h4>
+        <h4>🎯 节气气候雷达</h4>
         <div id="panel-radar" style="width:100%;height:280px;"></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button class="share-btn" data-share>🔗 分享</button>
+        <a href="wheel.html" class="share-btn" style="text-decoration:none;">🎡 轮盘查看</a>
       </div>
     </div>
   </div>`;
   
   if (currentChart) { currentChart.dispose(); currentChart = null; }
+  if (currentRadar) { currentRadar.dispose(); currentRadar = null; }
   currentChart = initTrendChart('panel-trend', term);
-  initRadarChart(term);
+  currentRadar = initRadarChart(term);
+  initShare();
 }
 
 function initRadarChart(term) {
@@ -141,12 +231,9 @@ function initRadarChart(term) {
     tooltip: {},
     radar: {
       indicator: [
-        { name: '温度', max: 35 },
-        { name: '湿度', max: 100 },
-        { name: '降水', max: 100 },
-        { name: '升温幅度', max: 3 },
-        { name: '白昼时长', max: 15 },
-        { name: '物候提前', max: 15 }
+        { name: '温度', max: 35 }, { name: '湿度', max: 100 },
+        { name: '降水', max: 100 }, { name: '升温幅度', max: 3 },
+        { name: '白昼时长', max: 15 }, { name: '物候提前', max: 15 }
       ],
       axisName: { color: '#a09888', fontSize: 12 },
       splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
@@ -164,6 +251,7 @@ function initRadarChart(term) {
       }]
     }]
   });
+  return chart;
 }
 </script>
 </body>

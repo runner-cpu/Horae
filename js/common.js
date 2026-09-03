@@ -297,3 +297,178 @@ function initTrendChart(containerId, term) {
   });
   return chart;
 }
+
+
+// ========== 增强版公共函数 ==========
+
+// 页面加载动画
+function initPageLoader() {
+  const loader = document.createElement('div');
+  loader.className = 'page-loader';
+  loader.id = 'pageLoader';
+  loader.innerHTML = '<div class="loader-ring"></div><div class="loader-text">HORAE</div>';
+  document.body.appendChild(loader);
+  window.addEventListener('load', () => {
+    setTimeout(() => { loader.classList.add('hidden'); setTimeout(() => loader.remove(), 700); }, 400);
+  });
+  // 兜底：3秒后强制隐藏
+  setTimeout(() => { if (loader.parentNode) { loader.classList.add('hidden'); setTimeout(() => loader.remove(), 700); } }, 3000);
+}
+
+// 数字滚动动画
+function animateNumber(el, target, duration = 1500, suffix = '') {
+  const start = 0;
+  const startTime = performance.now();
+  const isFloat = target % 1 !== 0;
+  function update(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+    const current = start + (target - start) * ease;
+    el.textContent = (isFloat ? current.toFixed(1) : Math.floor(current)) + suffix;
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+// 初始化所有数字滚动（元素需有 data-count 属性）
+function initCountUp() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseFloat(el.dataset.count);
+        const suffix = el.dataset.suffix || '';
+        animateNumber(el, target, 1800, suffix);
+        observer.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('[data-count]').forEach(el => observer.observe(el));
+}
+
+// 滚动入场动画
+function initScrollReveal() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+  document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(el => observer.observe(el));
+}
+
+// 计算当前节气
+function getCurrentTerm() {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  // 简化的节气日期映射
+  const termDates = [
+    { name: '小寒', start: [1, 5], end: [1, 19] },
+    { name: '大寒', start: [1, 20], end: [2, 3] },
+    { name: '立春', start: [2, 4], end: [2, 18] },
+    { name: '雨水', start: [2, 19], end: [3, 5] },
+    { name: '惊蛰', start: [3, 6], end: [3, 20] },
+    { name: '春分', start: [3, 21], end: [4, 4] },
+    { name: '清明', start: [4, 5], end: [4, 19] },
+    { name: '谷雨', start: [4, 20], end: [5, 5] },
+    { name: '立夏', start: [5, 6], end: [5, 20] },
+    { name: '小满', start: [5, 21], end: [6, 5] },
+    { name: '芒种', start: [6, 6], end: [6, 21] },
+    { name: '夏至', start: [6, 22], end: [7, 6] },
+    { name: '小暑', start: [7, 7], end: [7, 22] },
+    { name: '大暑', start: [7, 23], end: [8, 7] },
+    { name: '立秋', start: [8, 8], end: [8, 22] },
+    { name: '处暑', start: [8, 23], end: [9, 7] },
+    { name: '白露', start: [9, 8], end: [9, 22] },
+    { name: '秋分', start: [9, 23], end: [10, 7] },
+    { name: '寒露', start: [10, 8], end: [10, 22] },
+    { name: '霜降', start: [10, 23], end: [11, 6] },
+    { name: '立冬', start: [11, 7], end: [11, 21] },
+    { name: '小雪', start: [11, 22], end: [12, 6] },
+    { name: '大雪', start: [12, 7], end: [12, 21] },
+    { name: '冬至', start: [12, 22], end: [1, 4] }
+  ];
+  for (const t of termDates) {
+    const [sm, sd] = t.start;
+    const [em, ed] = t.end;
+    if (sm === em) {
+      if (month === sm && day >= sd && day <= ed) return t.name;
+    } else {
+      if ((month === sm && day >= sd) || (month === em && day <= ed)) return t.name;
+    }
+  }
+  return '冬至';
+}
+
+// 获取节气数据对象
+function getTermData(name) {
+  return solarTerms.find(t => t.name === name) || solarTerms[0];
+}
+
+// 分享功能
+function initShare() {
+  document.querySelectorAll('[data-share]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const url = window.location.href;
+      const title = document.title;
+      if (navigator.share) {
+        try { await navigator.share({ title, url }); } catch(e) {}
+      } else {
+        try {
+          await navigator.clipboard.writeText(url);
+          const original = btn.innerHTML;
+          btn.innerHTML = '✓ 已复制链接';
+          setTimeout(() => btn.innerHTML = original, 2000);
+        } catch(e) {
+          prompt('复制链接：', url);
+        }
+      }
+    });
+  });
+}
+
+// 打字机效果
+function typeWriter(el, text, speed = 30) {
+  return new Promise(resolve => {
+    el.innerHTML = '';
+    let i = 0;
+    const cursor = document.createElement('span');
+    cursor.className = 'typing-cursor';
+    el.appendChild(cursor);
+    function type() {
+      if (i < text.length) {
+        cursor.insertAdjacentText('beforebegin', text.charAt(i));
+        i++;
+        setTimeout(type, speed);
+      } else {
+        setTimeout(() => cursor.remove(), 500);
+        resolve();
+      }
+    }
+    type();
+  });
+}
+
+// 粒子性能优化（根据设备性能调整数量）
+function optimizeParticles() {
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const cores = navigator.hardwareConcurrency || 4;
+  if (isMobile || cores <= 4) {
+    particles = particles.slice(0, Math.floor(particles.length * 0.5));
+  }
+}
+
+// 增强版初始化
+function initEnhanced(pageName) {
+  initPageLoader();
+  // 延迟初始化滚动相关，确保DOM就绪
+  setTimeout(() => {
+    initCountUp();
+    initScrollReveal();
+    initShare();
+  }, 100);
+}
